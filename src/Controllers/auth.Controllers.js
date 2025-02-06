@@ -29,7 +29,7 @@ const signup = async (req, res) => {
         await user.save();
 
           // Generate email verification token
-          const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET || 'defaultsecret', { expiresIn: '1h' });
+          const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'defaultsecret', { expiresIn: '1h' });
           const verificationLink = `${process.env.CLIENT_URL}/verify-email?token=${encodeURIComponent(token)}`;
   
           // Send verification email

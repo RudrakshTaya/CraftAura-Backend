@@ -42,10 +42,19 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  customizationOptions: {
-    type: [String], // List of options like color, size, text input for engravings, etc.
-    default: [],
-  },
+// customizationOptions: {
+//   type: [
+//     {
+//       optionName: String,  
+//       optionType: { type: String, enum: ['text', 'dropdown', 'color', 'image', 'number'] },  
+//       choices: [String],
+//       required: Boolean
+//     }
+//   ],
+//   default: [], // ✅ Correct: Default should be an array, not an object
+// },
+
+
 
   // Brand and Inventory Information
   brand: {

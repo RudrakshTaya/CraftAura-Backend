@@ -73,6 +73,8 @@ const orderSchema = new mongoose.Schema({
         type: Date,
         default: Date.now, // Set updated date to now
     },
+
+   
 });
 
 // Update the updatedAt field on save

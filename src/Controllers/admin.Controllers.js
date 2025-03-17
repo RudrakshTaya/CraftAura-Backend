@@ -37,7 +37,7 @@ const getProductsByTypeForAdmin = async (req, res) => {
 const createProduct = [
   body('name').notEmpty().withMessage('Name is required'),
   body('price').isNumeric().withMessage('Price must be a number'),
-  
+
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -57,16 +57,47 @@ const createProduct = [
       } else {
         return res.status(400).json({ message: 'At least one image is required' });
       }
+
+      // Parse customizationOptions if it's a string (coming from FormData)
+      let customizationOptions = req.body.customizationOptions;
+      if (typeof customizationOptions === 'string') {
+        try {
+          customizationOptions = JSON.parse(customizationOptions);
+        } catch (error) {
+          return res.status(400).json({ message: 'Invalid customization options format' });
+        }
+      }
+
+      // Ensure choices are arrays of strings and filter out empty objects
+      if (Array.isArray(customizationOptions)) {
+        customizationOptions = customizationOptions.map((option) => ({
+          optionName: option.optionName || '',
+          optionType: option.optionType || 'text',
+          choices: Array.isArray(option.choices) 
+            ? option.choices.filter(choice => typeof choice === 'string' && choice.trim() !== '') 
+            : [],
+          required: option.required || false
+        }));
+      } else {
+        customizationOptions = [];
+      }
+
       // Create a new product document
       const newProduct = new Product({
-        ...req.body,
-      discount: {
-    percentage: req.body.discount, // or whatever you are calling it
-    expiresAt: req.body.discountExpiresAt, // and the expiration date
-  },
-        attributes:req.body.subcategory,
+        name: req.body.name,
+        description: req.body.description,
+        price: req.body.price,
+        category: req.body.category,
+        attributes: req.body.subcategory,
+        brand: req.body.brand,
+        stock: req.body.stock,
+        discount: {
+          percentage: req.body.discount || 0,
+          expiresAt: req.body.discountExpiresAt || null,
+        },
         images: imageUrls,
         adminId: req.user.userId, // The logged-in admin's ID
+        customizationOptions: customizationOptions,
       });
 
       const savedProduct = await newProduct.save();
@@ -80,6 +111,8 @@ const createProduct = [
     }
   },
 ];
+
+
 
 // Update an existing product (only if the product belongs to the logged-in admin)
 const updateProduct = [

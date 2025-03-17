@@ -62,6 +62,7 @@ const placeOrder = [
     }
 
     try {
+     
       const { products } = req.body;
       const userId = req.user.userId;
       let totalAmount = 0;
@@ -82,10 +83,10 @@ const placeOrder = [
           quantity: item.quantity,
           price: product.price,
           adminId: product.adminId,
-          name:product.name
+          name: product.name,
         });
-        totalAmount += product.price * item.quantity;
 
+        totalAmount += product.price * item.quantity;
         product.stock -= item.quantity;
         await product.save();
       }
@@ -109,11 +110,15 @@ const placeOrder = [
         razorpayOrderId: razorpayOrder.id,
         razorpayPaymentLink: `https://checkout.razorpay.com/v1/checkout.js?order_id=${razorpayOrder.id}`,
       });
+
     } catch (error) {
       console.error('Error placing order:', error.message);
       res.status(500).json({ message: 'Internal server error', error: error.message });
     }
   },
 ];
+
+
+
 
 module.exports = { placeOrder, getAllProductsForUsers, getProductsByTypeForUsers, getProductById };

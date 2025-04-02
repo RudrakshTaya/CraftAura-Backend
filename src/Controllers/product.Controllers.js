@@ -62,8 +62,8 @@ const placeOrder = [
     }
 
     try {
-     
       const { products } = req.body;
+      console.log("Received products:", products);
       const userId = req.user.userId;
       let totalAmount = 0;
       let orderItems = [];
@@ -84,6 +84,7 @@ const placeOrder = [
           price: product.price,
           adminId: product.adminId,
           name: product.name,
+          selectedCustomizations: item.selectedCustomizations || {} // ✅ Store selected customizations
         });
 
         totalAmount += product.price * item.quantity;
@@ -117,6 +118,7 @@ const placeOrder = [
     }
   },
 ];
+
 
 
 

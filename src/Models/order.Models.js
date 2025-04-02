@@ -32,6 +32,10 @@ const orderSchema = new mongoose.Schema({
                 ref: 'Admin', // Reference to the Admin model
                 required: true, // Ensure adminId is required to link to the admin
             },
+            selectedCustomizations: {
+        type: Object, // Allows storing key-value pairs (e.g., { Color: "Black", Name: "Akhil" })
+        default: {},
+      },
         },
     ],
     total: {

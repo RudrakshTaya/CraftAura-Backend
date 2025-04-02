@@ -33,54 +33,66 @@ const getProductsByTypeForAdmin = async (req, res) => {
   }
 };
 
-// Create a new product for the logged-in admin
 const createProduct = [
   body('name').notEmpty().withMessage('Name is required'),
   body('price').isNumeric().withMessage('Price must be a number'),
 
   async (req, res) => {
+    console.log("🔹 Incoming request to create product");
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log("❌ Validation errors:", errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
     try {
+      console.log("📥 Request Body:", req.body);
+      console.log("📸 Uploaded Files:", req.files);
+
       let imageUrls = [];
       if (req.files && req.files.length > 0) {
-        // Upload images to Cloudinary
         for (const file of req.files) {
+          console.log(`⏳ Uploading file to Cloudinary: ${file.path}`);
           const response = await uploadOnCloudinary(file.path);
           if (response && response.url) {
+            console.log(`✅ Uploaded image URL: ${response.url}`);
             imageUrls.push({ url: response.url, altText: req.body.name });
           }
         }
       } else {
+        console.log("❌ No images uploaded");
         return res.status(400).json({ message: 'At least one image is required' });
       }
 
+      // Convert isCustomizable from string to boolean
+      const isCustomizable = req.body.isCustomizable === 'true';
+      console.log("🔄 Parsed isCustomizable:", isCustomizable);
+
       // Parse customizationOptions if it's a string (coming from FormData)
-      let customizationOptions = req.body.customizationOptions;
-      if (typeof customizationOptions === 'string') {
+      let customizationOptions = [];
+      if (req.body.customizationOptions) {
+        console.log("📜 Raw customizationOptions:", req.body.customizationOptions);
         try {
-          customizationOptions = JSON.parse(customizationOptions);
+          const parsedOptions = JSON.parse(req.body.customizationOptions);
+          console.log("✅ Parsed customizationOptions:", parsedOptions);
+
+          if (Array.isArray(parsedOptions)) {
+            customizationOptions = parsedOptions.map((option) => ({
+              optionName: option.optionName || '',
+              optionType: option.optionType || 'text',
+              choices: Array.isArray(option.choices) 
+                ? option.choices.filter(choice => typeof choice === 'string' && choice.trim() !== '') 
+                : [],
+              required: option.required || false
+            }));
+          }
         } catch (error) {
+          console.log("❌ Error parsing customizationOptions:", error.message);
           return res.status(400).json({ message: 'Invalid customization options format' });
         }
       }
-
-      // Ensure choices are arrays of strings and filter out empty objects
-      if (Array.isArray(customizationOptions)) {
-        customizationOptions = customizationOptions.map((option) => ({
-          optionName: option.optionName || '',
-          optionType: option.optionType || 'text',
-          choices: Array.isArray(option.choices) 
-            ? option.choices.filter(choice => typeof choice === 'string' && choice.trim() !== '') 
-            : [],
-          required: option.required || false
-        }));
-      } else {
-        customizationOptions = [];
-      }
+      console.log("📌 Final customizationOptions:", customizationOptions);
 
       // Create a new product document
       const newProduct = new Product({
@@ -97,20 +109,28 @@ const createProduct = [
         },
         images: imageUrls,
         adminId: req.user.userId, // The logged-in admin's ID
+        isCustomizable: isCustomizable,
         customizationOptions: customizationOptions,
       });
 
+      console.log("💾 Saving product to database:", newProduct);
       const savedProduct = await newProduct.save();
+      console.log("✅ Product created successfully:", savedProduct);
+
       res.status(201).json({
         message: 'Product created successfully',
         product: savedProduct,
       });
+
     } catch (error) {
-      console.error('Error creating product:', error);
+      console.error("❌ Error creating product:", error);
       res.status(500).json({ message: 'Internal server error while creating product' });
     }
   },
 ];
+
+
+
 
 
 

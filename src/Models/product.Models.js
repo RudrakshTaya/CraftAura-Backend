@@ -2,71 +2,44 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   // Basic Product Information
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  description: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  
+  name: { type: String, required: true, trim: true },
+  description: { type: String, required: true, trim: true },
+
   // Price and Category
-  price: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
+  price: { type: Number, required: true, min: 0 },
   category: {
     type: String,
     required: true,
     enum: [
-      'Original Handmade Art and Decor', 
-      'Personalized Clothing and Accessories', 
-      'DIY Kits and Craft Materials', 
-      'Customized Home and Gift Items', 
-      'Sustainable and Upcycled Crafts', 
-      'Limited Edition Collaborative Products'
+      'Original Handmade Art and Decor',
+      'Personalized Clothing and Accessories',
+      'DIY Kits and Craft Materials',
+      'Customized Home and Gift Items',
+      'Sustainable and Upcycled Crafts',
+      'Limited Edition Collaborative Products',
     ],
   },
-  
+
   // Attributes (for flexible product-specific details)
-  attributes: {
-    type: mongoose.Schema.Types.Mixed,
+  attributes: { type: mongoose.Schema.Types.Mixed },
+
+  // Customization Options
+  isCustomizable: { type: Boolean, default: false },
+  customizationOptions: {
+    type: [
+      {
+        optionName: { type: String, required: true },
+        optionType: { type: String, enum: ['text', 'dropdown', 'color', 'image', 'number'], required: true },
+        choices: { type: [String], default: [] }, // Ensure it's an array
+        required: { type: Boolean, default: false },
+      },
+    ],
+    default: [], // ✅ Ensures customizationOptions is always an array
   },
-
-  // Specific Fields for Customization or Personalization
-  isCustomizable: {
-    type: Boolean,
-    default: false,
-  },
-// customizationOptions: {
-//   type: [
-//     {
-//       optionName: String,  
-//       optionType: { type: String, enum: ['text', 'dropdown', 'color', 'image', 'number'] },  
-//       choices: [String],
-//       required: Boolean
-//     }
-//   ],
-//   default: [], // ✅ Correct: Default should be an array, not an object
-// },
-
-
 
   // Brand and Inventory Information
-  brand: {
-    type: String,
-    required: true,
-  },
-  stock: {
-    type: Number,
-    required: true,
-    min: 0,
-    default: 0,
-  },
+  brand: { type: String, required: true },
+  stock: { type: Number, required: true, min: 0, default: 0 },
 
   // Images
   images: [
@@ -75,13 +48,13 @@ const productSchema = new mongoose.Schema({
       altText: { type: String, default: '' },
     },
   ],
-  
+
   // Ratings
   ratings: {
     averageRating: { type: Number, default: 0, min: 0, max: 5 },
     reviewCount: { type: Number, default: 0 },
   },
-  
+
   // Discount
   discount: {
     percentage: { type: Number, default: 0, min: 0, max: 100 },
@@ -89,25 +62,15 @@ const productSchema = new mongoose.Schema({
   },
 
   // Admin ID
-  adminId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  
+  adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+
   // Timestamps
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
 // Middleware: Automatically update `updatedAt` on each save
-productSchema.pre('save', function(next) {
+productSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });

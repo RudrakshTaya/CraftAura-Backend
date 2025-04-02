@@ -23,7 +23,7 @@ connectDB();
 // Add CORS middleware with appropriate settings
 app.use(cors({
   origin: ['https://craftaura.vercel.app', 'https://art-p.vercel.app','http://localhost:3000','http://localhost:3001'], // Correct way to specify multiple origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true // If using cookies or authentication
 }));

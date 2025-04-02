@@ -16,11 +16,15 @@ const cartSchema = new mongoose.Schema({
       quantity: {
         type: Number,
         required: true,
-        min: 1, // Ensure quantity is at least 1
+        min: 1,
+      },
+      selectedCustomizations: {
+        type: Object, // Allows storing key-value pairs (e.g., { Color: "Black", Name: "Akhil" })
+        default: {},
       },
     },
   ],
-}, { timestamps: true }); // Optional: Add timestamps for createdAt and updatedAt
+}, { timestamps: true });
 
 const Cart = mongoose.model('Cart', cartSchema);
 
